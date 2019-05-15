@@ -21,18 +21,19 @@ void MainWindow::on_ButtonCalculatePI_clicked()
     }
 
     if(!ui->lineEditValueN->text().isEmpty()){
-        Nvalue=ui->lineEditValueN->text().toDouble();
+        Nvalue=ui->lineEditValueN->text().toInt();
     }
-    double N = Nvalue;
+    int N = Nvalue;
     double result=0;
     int NProc = NumberOfProcessors;
-
-#pragma omp parallel num_threads(NProc) private(N) shared(result)
+    omp_set_num_threads(NProc);
+#pragma omp parallel private(N) shared(result)
+    {
         #pragma omp for reduction (+:result)
         for(int i=0; i<N;i++){
-            result+=(1/N)*(4/(1+ ((i+0.5)/N)*((i+0.5)/N) ));
+            result+=(1/(double)N)*(4/(1+ ((i+0.5)/(double)N)*((i+0.5)/(double)N) ));
         }
-    
+    }
     ui->lineEditResult->setText(QString::number(result));
 
 }
